@@ -1,2 +1,3 @@
 # Analyzing-Public-Opinion-on-Mass-Transportation
 Using cluster analysis
+The given dataset was extracted from a survey including 599 observations and 53 variables. Each variable corresponds to a survey question about respondents’ demographic information (age, gender, marital status, number of cars owned by family, etc.) and their opinion on the current energy crisis and use of public transportation.
