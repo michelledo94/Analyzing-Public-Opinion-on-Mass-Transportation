@@ -6,11 +6,11 @@ The given dataset (`masst.csv`) was extracted from a survey including 599 observ
 
 The following is a brief description of the data in file `masst.csv`
 (Questions 4.9, 5.12, 6.9, 7.5, 8.9)
-------------------------------------------------------------
+
 Variable        Variable        Description
                 Location
                 (Columns)
-------------------------------------------------------------
+
 ID              1-4             Identification number from 1
                                 to 598
 V1              5-6             Economy
@@ -52,9 +52,9 @@ V52             62              Ethnic background
 
 The following table provides a more detailed description of each variable.
 
-------------------------------------------------------------
+
 Variable        Value           Description
-------------------------------------------------------------
+
 V1-V6           1-25     Feature saliences affecting mode of
                          transportation (car,bus,taxi) to
                          work/school 25 = highest salience
@@ -120,7 +120,7 @@ V51             1               Less than  5,000
 V52             1               Caucasian
                 2               African-American
                 3               Other
-------------------------------------------------------------
+
 
 Respondents expressed their opinions on the following statements about the
 energy crisis :
@@ -163,10 +163,10 @@ Indicate below, by circling the appropriate number, the degree to which you will
 use mass transportation for going to work (or school) for a given percentage
 increase in gasoline prices (assume that the current price of gasoline is on the
 average 1.20 per gallon).
----------------------------------------------------------------------------------
+
 Increase in     Will not  Will use it   Will use it  Will use it  Will use it
 gasoline price  use it    infrequently  moderately   frequently   very frequently
----------------------------------------------------------------------------------
+
   10%              1            2           3           4               5
   20%              1            2           3           4               5
   .                .            .           .           .               .
@@ -175,5 +175,5 @@ gasoline price  use it    infrequently  moderately   frequently   very frequentl
  100%              1            2           3           4               5
  150%              1            2           3           4               5
 More than 150%     1            2           3           4               5
----------------------------------------------------------------------------------
+
  
