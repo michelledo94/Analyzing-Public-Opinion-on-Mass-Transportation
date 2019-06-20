@@ -7,7 +7,6 @@ Mass transportation
 -----
 **Data pre-processing**
 
-Load libraries:
 ```{r include=FALSE}
 library(dplyr)
 library(flexclust)
@@ -25,7 +24,7 @@ The given dataset was extracted from a survey including 599 observations and 53 
 View the data: 
 
 ```{r}
-masst <- read.csv("E:/MSBA/5 STAT 630 Mutivariate Analysis/Week 5 - Cluster Analysis/Homework/masst.csv", header=TRUE)
+masst <- read.csv("masst.csv", header=TRUE)
 colnames(masst)[1] <- "V1" # correct a wrong column name
 str(masst)
 ```
