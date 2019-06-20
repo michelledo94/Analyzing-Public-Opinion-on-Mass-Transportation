@@ -1,5 +1,166 @@
 # Analyzing-Public-Opinion-on-Mass-Transportation
-View visualization on RPubs: http://rpubs.com/michelledo202/masst-ca
+View full code and visualization on RPubs: http://rpubs.com/michelledo202/masst-ca
 
 
 The given dataset (`masst.csv`) was extracted from a survey including 599 observations and 53 variables. Each variable corresponds to a survey question about respondents’ demographic information (age, gender, marital status, number of cars owned by family, etc.) and their opinion on the current energy crisis and use of public transportation.
+
+**Data pre-processing**
+
+Load libraries:
+```{r include=FALSE}
+library(dplyr)
+library(flexclust)
+library(factoextra)
+library(pca3d)
+library(dplyr)
+library(ggcorrplot)
+library(psych)
+library(ggplot2)
+library(tidyr)
+```
+
+The given dataset was extracted from a survey including 599 observations and 53 variables. Each variable corresponds to a survey question about respondents' demographic information (age, gender, marital status, number of cars owned by family, etc.) and their opinion on using public transportation. More details can be found at 
+
+View the data: 
+
+```{r}
+masst <- read.csv("masst.csv", header=TRUE)
+colnames(masst)[1] <- "V1" # correct a wrong column name
+str(masst)
+```
+
+Check missing patterns:
+
+```{r}
+# Unique values per column
+lapply(masst, function(x) length(unique(x))) 
+#Check for Missing values
+missing_values = masst %>% summarize_all(funs(sum(is.na(.))/n()))
+missing_values = gather(missing_values, key="feature", value="missing_pct")
+missing_values %>% 
+  ggplot(aes(x=reorder(feature,-missing_pct),y=missing_pct))+
+  geom_bar(stat="identity",fill="red")+
+  coord_flip()+theme_bw()
+```
+
+Because most of the missing values come from V48 (Spouse's education, as a lot of respondents had not married by the time they filled the questionnaire), I remove this column entirely to reduce the number of rows lost. 
+
+```{r}
+masst=masst[,-48]
+dim(masst) #view the dataset
+```
+
+For this problem I don't want to induce any biases from imputing missing cells, so let's just remove incomplete observations:
+
+```{r cache = TRUE}
+masst=na.omit(masst)
+dim(masst)
+```
+
+It can be seen that there is a significant difference in feature scale. To make it easier to compare them, let's normalize the data and discover the dataset through a correlation heatmap. Normalizing data is necessary for cluster analysis because clustering techniques are built around the concept of measuring the distance between observations we are trying to group. Therefore, the analysis outcome will be overly influenced by any variables with a disproportionately higher scale than that of others. 
+
+```{r cache = TRUE}
+masst = scale(masst) # standardize the dataset
+correl <- cor(masst, use = "complete.obs")
+ggcorrplot(correl)
+```
+
+As can be seen, variables V7 through V18 are highly correlated because they ask for the same information. 
+
+**Hierachical clustering**
+
+create a distance matrix using the single linkage method: 
+
+```{r cache = TRUE}
+D_matrix = dist(masst)
+```
+
+Plot a dendrogram to see how observations cluster together: 
+
+```{r cache = TRUE}
+dend = hclust(D_matrix, "single")
+plot(dend, main = "Mass Transportation Dendrogram", xlab = "Questions", ylab = "Distance")
+```
+
+As can be seen from the plot, this dataset has too many observations to be well presented with a dendrogram. Also, this is one of the cases when hierarchical clustering shows ineffectiveness because most of the observations will be grouped into the first cluster and a handful of outliers will become standalone clusters. So for this case, we skip the single linkage method and proceed to the k-means method. 
+
+**k-means clustering**
+
+The first step to do is to determine the optimal number of clusters using total within-cluster sum of squares. 
+
+```{r}
+set.seed(1)
+fviz_nbclust(masst, kmeans, method = "wss")
+```
+
+The plot above shows that the total within-cluster sum of squares does not decrease much after cluster 5 (elbow point), so let's go with 5 clusters. Still, identifying the elbow/cutoff point can be subjective and may need domain expertise/considering the purpose of the analysis when done in practice.  
+
+Run the k-means algorithm: 
+
+```{r}
+set.seed(1)
+kcl=kmeans(masst,5)
+kcl
+```
+
+Let's see how many observations each cluster has: 
+
+```{r}
+kcl$size
+```
+
+Since the dataset is large, to have a better picture of what the centers tell about their clusters, we plot a heatmap as follows: 
+
+```{r}
+heatmap(kcl$centers, xlab="Variables", ylab="Cluster",
+        col = colorRampPalette(c("blue", "white", "red"))(100),
+        Colv = NA, Rowv = NA, scale = "column")
+```
+
+Color code: blue - low, white - moderate, red - high. From there we can see that Cluster 1 is high in questions 7 through 11, meaning that they are quick to turn to mass transportation with just a slight increase in gas price. In contrast, respondents in Cluster 4 are more sluggish to change their means of transportation, or only willing to change when there is a steep increase in the price. Cluster 5 people seem to be the least likely group to move to public transportation in case of an increase in gas expense. Meanwhile, Cluster2 and 3 are largely moderate in their preference for public transportation. 
+
+Cluster 2 is very low in V44 through 46 and V50, 51 - questions asking about the numbers of adults, children, cars, full-time workers and household income of their families. We can deduce that this group is made up mostly of young and unmarried people. 
+
+Another interesting insight is when looking at the last question (V52), we can see the main race group of each cluster. Because the score for this question is given low to Caucasian and high for other race groups, the map tells us that Cluster 5 consist mostly of white people, Cluster 2 and 3 represent African Americans and Cluster 4 is a mix of people from other races. 
+
+**Projecting onto principal components**
+
+Let's project the clusters onto 2 biggest PCs to see how they relate to each other. It should be noted that with such a high number of variables, the first two PCs can only explain more than 20% of the data variance. So PCA may not give us a clear-cut interpretation of the whole dataset.  
+
+```{r cache = TRUE}
+sigma=var(masst)
+vars=diag(sigma)
+percentvars=vars/sum(vars)
+ident=diag(52)
+eigenvalues=eigen(sigma)$values
+eigenvectors=eigen(sigma)$vectors
+pcs=eigenvectors[1:8,]
+colnames(pcs)=colnames(masst)
+pc1=pcs[1,] #the 6 highest loading variables in PC1 
+pc1=sort(pc1, decreasing=TRUE)
+head(pc1)
+```
+
+As can be seen, PC1 is driven by variables such as V38, V25, V32, V5, V17 and V26. People scoring high in these questions tend to have a strong opinion against electricity and petrolum companies, highly agreeing that these firms have not done all they could to solve the energy problem.  
+
+```{r cache = TRUE}
+pc2=pcs[2,] #the 6 highest loading variables in PC2
+pc2=sort(pc2, decreasing=TRUE)
+head(pc2)
+```
+
+PC2 is representated by variables like V39, V5, V8 and V30. People who put a high score on these variables tend to live further away from school or work compared with an average respondent and are more price sensitive. So they are more willing to use mass transportation when there is a slight increase in gas price. 
+
+Let's see how the clusters relate to each other when projected on 2 largest PCs:
+
+```{r}
+pca <- prcomp(masst, scale.= TRUE )
+pca2d( pca, group=kcl$cluster )
+pca2d( pca, group=kcl$cluster,show.labels=TRUE, fancy=TRUE)
+```
+
+In the plot, Cluster 1 is represented by orange, Cluster 2 light blue, Cluster 3 green, Cluster 4 yellow and Cluster 5 dark blue. 
+
+As can be seen, Cluster 3 and 4 are less likely to adopt mass transportation, and Cluster 1, 2 and 3 include a lot of people who are disagree with the petroleum and electricity industries' practices. 
+
+Overall, we need more PCs to fully explain the data variance and draw more detailed insights from the the visualization. 
