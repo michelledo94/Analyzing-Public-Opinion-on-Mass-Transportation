@@ -4,7 +4,7 @@ View full code and visualization on RPubs: http://rpubs.com/michelledo202/masst-
 
 The given dataset (`masst.csv`) was extracted from a survey including 599 observations and 53 variables. Each variable corresponds to a survey question about respondents’ demographic information (age, gender, marital status, number of cars owned by family, etc.) and their opinion on the current energy crisis and use of public transportation.
 
-**Data pre-processing**
+## Data prep
 
 ```{r include=FALSE}
 library(dplyr)
@@ -66,7 +66,7 @@ ggcorrplot(correl)
 
 As can be seen, variables V7 through V18 are highly correlated because they ask for the same information. 
 
-**Hierachical clustering**
+## Hierachical clustering
 
 create a distance matrix using the single linkage method: 
 
@@ -83,7 +83,7 @@ plot(dend, main = "Mass Transportation Dendrogram", xlab = "Questions", ylab = "
 
 As can be seen from the plot, this dataset has too many observations to be well presented with a dendrogram. Also, this is one of the cases when hierarchical clustering shows ineffectiveness because most of the observations will be grouped into the first cluster and a handful of outliers will become standalone clusters. So for this case, we skip the single linkage method and proceed to the k-means method. 
 
-**k-means clustering**
+## k-means clustering
 
 The first step to do is to determine the optimal number of clusters using total within-cluster sum of squares. 
 
@@ -122,7 +122,7 @@ Cluster 2 is very low in V44 through 46 and V50, 51 - questions asking about the
 
 Another interesting insight is when looking at the last question (V52), we can see the main race group of each cluster. Because the score for this question is given low to Caucasian and high for other race groups, the map tells us that Cluster 5 consist mostly of white people, Cluster 2 and 3 represent African Americans and Cluster 4 is a mix of people from other races. 
 
-**Projecting onto principal components**
+## Projecting onto principal components
 
 Let's project the clusters onto 2 biggest PCs to see how they relate to each other. It should be noted that with such a high number of variables, the first two PCs can only explain more than 20% of the data variance. So PCA may not give us a clear-cut interpretation of the whole dataset.  
 
