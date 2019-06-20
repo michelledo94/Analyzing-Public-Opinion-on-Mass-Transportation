@@ -6,7 +6,6 @@ The given dataset (`masst.csv`) was extracted from a survey including 599 observ
 
 **Data pre-processing**
 
-Load libraries:
 ```{r include=FALSE}
 library(dplyr)
 library(flexclust)
